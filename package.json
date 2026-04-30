@@ -1,0 +1,19 @@
+{
+  "name": "@qontinui/cloud-control",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Proprietary cloud-only frontend extension to qontinui-web.",
+  "main": "./src/index.ts",
+  "scripts": {
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@stripe/stripe-js": "^4"
+  },
+  "peerDependencies": {
+    "@qontinui/web": "file:../qontinui-web/frontend",
+    "react": "^18",
+    "react-dom": "^18",
+    "next": "^14"
+  }
+}

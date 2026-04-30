@@ -1,0 +1,17 @@
+PROPRIETARY LICENSE — qontinui-cloud-control
+
+Copyright (c) 2026 Joshua Spinak. All rights reserved.
+
+This software is proprietary and confidential. No license, express or
+implied, is granted to use, copy, modify, merge, publish, distribute,
+sublicense, or sell copies of this software, in whole or in part, except
+as expressly permitted in writing by the copyright holder.
+
+This repository is not open source and is not subject to the AGPL-3.0
+license that governs qontinui-web. The two repositories are intentionally
+separated: qontinui-web is open source; qontinui-cloud-control is closed.
+
+Any attempt to use, distribute, or otherwise exploit this code without
+explicit written permission is a violation of copyright law.
+
+For licensing inquiries: jspinak@hotmail.com

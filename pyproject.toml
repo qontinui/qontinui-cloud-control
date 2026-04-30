@@ -1,0 +1,27 @@
+[project]
+name = "qontinui-cloud-control"
+version = "0.1.0"
+description = "Proprietary cloud-only extension to qontinui-web. Powers qontinui.cloud."
+readme = "README.md"
+requires-python = ">=3.12"
+license = "Proprietary"
+authors = [
+  {name = "Joshua Spinak", email = "jspinak@hotmail.com"},
+]
+dependencies = [
+  # qontinui-web is consumed as an editable sibling install:
+  #   pip install -e ../qontinui-web/backend
+  # before installing this package. We do NOT list qontinui-web here as a
+  # path-dep so the dependency is explicit at install time and the file://
+  # URL doesn't bake in absolute paths.
+  "stripe>=8",
+  "boto3>=1.34",
+]
+
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["backend"]
+include = ["qontinui_cloud_control*"]
