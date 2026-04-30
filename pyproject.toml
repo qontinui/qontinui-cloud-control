@@ -4,7 +4,7 @@ version = "0.1.0"
 description = "Proprietary cloud-only extension to qontinui-web. Powers qontinui.cloud."
 readme = "README.md"
 requires-python = ">=3.12"
-license = "Proprietary"
+license = {text = "Proprietary - all rights reserved. See LICENSE."}
 authors = [
   {name = "Joshua Spinak", email = "jspinak@hotmail.com"},
 ]
