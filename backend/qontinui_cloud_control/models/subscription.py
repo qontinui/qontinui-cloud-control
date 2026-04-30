@@ -29,13 +29,25 @@ class SubscriptionTier(StrEnum):
 
 
 class Subscription(Base):
-    """User subscription information"""
+    """User subscription information.
+
+    Lives in the ``cloud`` schema (see
+    ``qontinui-web/backend/alembic/versions/cloud_schema_initial_tables.py``
+    for the migration). Cross-schema FK to ``auth.users.id`` — the
+    consolidation transplant relocated the users table from
+    ``runner.users`` / ``public.users`` to ``auth.users`` via
+    ``consolidation_phase2_zz_final_runner_cleanup``.
+    """
 
     __tablename__ = "subscriptions"
+    __table_args__ = {"schema": "cloud"}
 
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(
-        UUID(as_uuid=True), ForeignKey("runner.users.id"), nullable=False, unique=True
+        UUID(as_uuid=True),
+        ForeignKey("auth.users.id", ondelete="CASCADE"),
+        nullable=False,
+        unique=True,
     )
 
     # Stripe fields

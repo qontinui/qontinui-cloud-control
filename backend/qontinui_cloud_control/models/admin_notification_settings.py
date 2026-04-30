@@ -21,9 +21,15 @@ class AdminNotificationSettings(Base):
 
     This table should have only one row that stores the global admin
     notification configuration. Use the class methods to get/update settings.
+
+    Lives in the ``cloud`` schema (see
+    ``qontinui-web/backend/alembic/versions/cloud_schema_initial_tables.py``
+    for the migration). Singleton; no FK; cloud-deployment-global
+    operator preferences.
     """
 
     __tablename__ = "admin_notification_settings"
+    __table_args__ = {"schema": "cloud"}
 
     id = Column(
         UUID(as_uuid=True), primary_key=True, server_default=text("gen_random_uuid()")
