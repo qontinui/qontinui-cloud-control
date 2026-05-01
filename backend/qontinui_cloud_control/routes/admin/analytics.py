@@ -8,8 +8,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.api.admin_deps import require_admin
 from app.api.deps import get_async_db
 from app.models.user import User
-from app.services.auth_analytics_service import auth_analytics_service
 from qontinui_cloud_control.repositories.admin_user import admin_user_repository
+from qontinui_cloud_control.services.auth_analytics_aggregator import (
+    auth_analytics_aggregator,
+)
 
 router = APIRouter()
 
@@ -47,4 +49,4 @@ async def get_analytics_summary(
         Comprehensive analytics summary with login stats, remember_me adoption,
         active sessions, security events, and top user activity
     """
-    return await auth_analytics_service.get_comprehensive_summary(db, days)
+    return await auth_analytics_aggregator.get_comprehensive_summary(db, days)
