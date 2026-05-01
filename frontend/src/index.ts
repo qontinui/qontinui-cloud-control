@@ -6,8 +6,12 @@
  * (`@qontinui/web/lib/extension-slots`).
  */
 
-import { lazy } from "react";
+import { lazy, type ComponentType } from "react";
 import { registerCloudExtensions } from "@qontinui/web/lib/extension-slots";
+import { OrganizationSwitcher } from "./components/collaboration/OrganizationSwitcher";
+import { CreateOrganizationDialog } from "./components/collaboration/CreateOrganizationDialog";
+import { TeamMemberList } from "./components/collaboration/TeamMemberList";
+import { InviteMemberDialog } from "./components/collaboration/InviteMemberDialog";
 
 registerCloudExtensions({
   appRoutes: [
@@ -85,4 +89,15 @@ registerCloudExtensions({
   ],
   profilePanels: [],
   services: {},
+  // Inline component slots — OSS shell renders these via `getComponent(slot)`
+  // when the cloud-control bundle has loaded, or nothing in OSS-only deploys.
+  // Cast to `ComponentType<unknown>` because the slot Map stores opaque
+  // components; OSS consumers re-cast to their declared prop interface
+  // (see `qontinui-web/frontend/src/lib/cloud-component-slots.ts`).
+  components: {
+    organizationSwitcher: OrganizationSwitcher as ComponentType<unknown>,
+    createOrganizationDialog: CreateOrganizationDialog as ComponentType<unknown>,
+    teamMemberList: TeamMemberList as ComponentType<unknown>,
+    inviteMemberDialog: InviteMemberDialog as ComponentType<unknown>,
+  },
 });
