@@ -73,4 +73,15 @@ class Subscription(Base):
     )
 
     # Relationships
-    user = relationship("User", back_populates="subscription")
+    #
+    # Subscription.user is a one-way reference to qontinui-web's User model.
+    # We deliberately do NOT use back_populates="subscription" here because:
+    #
+    # 1. qontinui-web is the OSS core and MUST be deployable without
+    #    cloud-control installed (per app/main.py:18 ImportError handling).
+    # 2. If User declared subscription = relationship("Subscription", ...)
+    #    on its side, mapper init in the OSS-only deploy fails looking for
+    #    a missing class — the AWS staging login outage on 2026-05-20.
+    # 3. A one-way reference here keeps the cross-package coupling clean:
+    #    cloud-control depends on web's User, never vice versa.
+    user = relationship("User")
