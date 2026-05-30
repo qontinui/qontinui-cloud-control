@@ -323,6 +323,34 @@ export default function OrganizationSettingsPage() {
 
           <div className="border-t border-border" />
 
+          <section className="space-y-3">
+            <div>
+              <h2 className="text-sm font-medium">Coordination &amp; automation</h2>
+              <p className="text-xs text-muted-foreground">
+                Configure whether coordination can autonomously start your next
+                step of work when your session goes stale.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() =>
+                router.push(`/organizations/${orgId}/settings/coordination`)
+              }
+              className="w-full flex items-center justify-between rounded-lg border border-border px-4 py-3 text-left hover:border-primary transition-colors group"
+            >
+              <div>
+                <p className="text-sm font-medium group-hover:text-primary transition-colors">
+                  Coordination &amp; automation →
+                </p>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Autonomous next-step · per-decision autonomy levels
+                </p>
+              </div>
+            </button>
+          </section>
+
+          <div className="border-t border-border" />
+
           <section className="space-y-4">
             <div>
               <h2 className="text-sm font-medium text-red-400">Danger Zone</h2>
