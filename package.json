@@ -2,7 +2,8 @@
   "name": "@qontinui/cloud-control",
   "version": "0.1.0",
   "private": true,
-  "description": "Proprietary cloud-only frontend extension to qontinui-web.",
+  "license": "AGPL-3.0-or-later",
+  "description": "Cloud extension to qontinui-web — powers the qontinui.cloud deployment (billing, multi-tenant routing, cloud-admin). AGPL-3.0; not published to npm (consumed as a file: path dependency).",
   "main": "./src/index.ts",
   "scripts": {
     "test": "vitest run"

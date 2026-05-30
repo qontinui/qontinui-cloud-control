@@ -1,10 +1,10 @@
 [project]
 name = "qontinui-cloud-control"
 version = "0.1.0"
-description = "Proprietary cloud-only extension to qontinui-web. Powers qontinui.cloud."
+description = "Cloud extension to qontinui-web that powers the qontinui.cloud deployment (billing, multi-tenant routing, cloud-admin)."
 readme = "README.md"
 requires-python = ">=3.12"
-license = {text = "Proprietary - all rights reserved. See LICENSE."}
+license = "AGPL-3.0-or-later"
 authors = [
   {name = "Joshua Spinak", email = "jspinak@hotmail.com"},
 ]
