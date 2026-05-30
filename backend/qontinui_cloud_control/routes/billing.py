@@ -197,11 +197,21 @@ async def stripe_webhook(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Invalid signature",
             )
-    else:
-        # For testing without webhook secret
+    elif settings.ENVIRONMENT == "development":
+        # Dev-only escape hatch: when no signing secret is configured, accept the
+        # event unverified so local testing works without Stripe CLI forwarding.
+        # Fails closed in every other environment (see else) — an unsigned webhook
+        # is forgeable (e.g. a fake checkout.session.completed to self-upgrade).
         event = stripe.Event.construct_from(
             values=await request.json(),
             key=settings.STRIPE_SECRET_KEY,
+        )
+    else:
+        # No webhook signing secret configured outside development — reject rather
+        # than trust a forgeable unsigned event.
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Webhook signing secret not configured",
         )
 
     # Handle the event
