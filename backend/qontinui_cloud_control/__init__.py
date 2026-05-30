@@ -13,7 +13,6 @@ from app.extensions import (
 def _register_routes(api_router):
     from qontinui_cloud_control.routes import (
         admin_ws,
-        beta_signup,
         billing,
         organizations,
     )
@@ -25,7 +24,6 @@ def _register_routes(api_router):
     api_router.include_router(
         organizations.router, prefix="/organizations", tags=["organizations"]
     )
-    api_router.include_router(beta_signup.router, prefix="/auth", tags=["auth"])
 
 
 def _register_models():
