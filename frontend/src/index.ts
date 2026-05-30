@@ -60,15 +60,6 @@ registerCloudExtensions({
       ),
     },
     {
-      path: "/organizations/:id/settings/coordination",
-      Component: lazy(
-        () =>
-          import(
-            "./routes/organizations/[id]/settings/coordination/page"
-          )
-      ),
-    },
-    {
       path: "/invitations/accept",
       Component: lazy(() => import("./routes/invitations/accept/page")),
     },
