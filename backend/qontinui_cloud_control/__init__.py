@@ -1,4 +1,4 @@
-"""qontinui-cloud-control — proprietary cloud-only extension to qontinui-web.
+"""qontinui-cloud-control — cloud extension to qontinui-web (AGPL-3.0-or-later).
 
 Importing this package side-effect-registers the cloud-control routes,
 models, services, and permission checks with the OSS extension surface.

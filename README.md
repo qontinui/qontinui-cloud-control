@@ -1,10 +1,10 @@
 # qontinui-cloud-control
 
-**Proprietary, cloud-only.** Not open source. Not redistributable.
+**Open source (AGPL-3.0-or-later).** Cloud extension to qontinui-web.
 
-This repo contains the cloud-only layer that powers the [qontinui.cloud](https://qontinui.cloud) deployment of qontinui-web. It composes on top of the OSS [`qontinui-web`](https://github.com/jspinak/qontinui-web) frontend by side-effect-registering routes, models, services, components, and permission checks via the OSS extension surface (`app.extensions` on the backend, `lib/extension-slots.ts` on the frontend).
+This repo contains the cloud layer that powers the [qontinui.cloud](https://qontinui.cloud) deployment of qontinui-web. It composes on top of the [`qontinui-web`](https://github.com/qontinui/qontinui-web) frontend by side-effect-registering routes, models, services, components, and permission checks via the OSS extension surface (`app.extensions` on the backend, `lib/extension-slots.ts` on the frontend).
 
-Self-hosters never run this code. The cloud product is the only deployment that includes it.
+Self-hosters never need to run this code — the qontinui.cloud product is the deployment that includes it — but the source is open: the value of the hosted product is operating it (managed convenience, scale, and the per-customer knowledge moat), not withholding billing/multi-tenant CRUD. The monetizable concurrent-coordination layer lives in the closed `qontinui-coord` service, not here.
 
 ## What lives here
 
@@ -23,8 +23,8 @@ Required sibling-repo layout:
 
 ```
 qontinui-root/
-├── qontinui-web/         (OSS, AGPL-v3)
-└── qontinui-cloud-control/   (this repo, proprietary)
+├── qontinui-web/         (OSS, AGPL-3.0)
+└── qontinui-cloud-control/   (this repo, OSS, AGPL-3.0)
 ```
 
 Cloud-control developers always need qontinui-web checked out as a sibling; OSS contributors never need cloud-control.
@@ -50,9 +50,6 @@ pnpm dev
 
 OSS's `layout.tsx` dynamic-imports `@qontinui/cloud-control`; the import is silently no-op'd when the package isn't linked.
 
-## Reference docs
+## License
 
-* `tmp_cloud_control_carve_out.md` (in qontinui-web's repo root) — full boundary design.
-* `tmp_cloud_control_audit.md` — the OSS-vs-cloud-control verdict catalog that drove the carve-out.
-* `tmp_qontinui_business_model.md` §4 — operate-don't-feature gating posture.
-* `tmp_canonical_db_topology_plan.md` §4 — the `cloud.*` schema lives in OSS migrations; ORM classes here.
+Licensed under the **GNU Affero General Public License v3.0 or later** (`AGPL-3.0-or-later`). See [`LICENSE`](LICENSE) for the full text. Contributions are accepted under the Developer Certificate of Origin — see [`CONTRIBUTING.md`](CONTRIBUTING.md).
