@@ -654,11 +654,13 @@ export default function ResponsibleUseFAQ() {
                   Can I inspect the source code?
                 </h3>
                 <p>
-                  <strong>Partially.</strong> Our Python library (qontinui) and
-                  desktop runner (qontinui-runner) are open source and available
-                  on GitHub. The web interface and backend are proprietary. You
-                  can review how the automation engine works and verify it
-                  doesn&apos;t contain malicious code.
+                  <strong>Yes.</strong> Our Python library (qontinui), desktop
+                  runner (qontinui-runner), and the web interface and backend
+                  (qontinui-web, qontinui-cloud-control) are all open source
+                  (AGPL-3.0) and available on GitHub. The hosted coordination
+                  service is the one proprietary component. You can review how
+                  the automation engine works and verify it doesn&apos;t contain
+                  malicious code.
                 </p>
               </div>
 

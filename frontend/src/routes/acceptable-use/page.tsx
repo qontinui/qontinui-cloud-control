@@ -198,8 +198,9 @@ export default function AcceptableUsePolicy() {
                 Reselling or redistributing Qontinui without authorization
               </li>
               <li>
-                Creating derivative products that compete with Qontinui using
-                our proprietary components
+                Creating derivative products using our proprietary hosted
+                coordination service (our open-source components may be used
+                under their AGPL-3.0 license terms)
               </li>
               <li>
                 Sharing account credentials or creating accounts for others

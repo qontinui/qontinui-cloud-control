@@ -320,9 +320,9 @@ export default function TermsOfService() {
               <li>Scrape, crawl, or spider the Service without permission</li>
               <li>
                 Reverse engineer or attempt to extract source code from the
-                proprietary components of the Service (the web interface and
-                certain backend components; open-source components are governed
-                by their respective licenses)
+                proprietary components of the Service (the hosted coordination
+                service; the web interface and backend are open source under
+                AGPL-3.0 and governed by that license)
               </li>
               <li>Use the Service for any illegal or unauthorized purpose</li>
               <li>
@@ -365,8 +365,9 @@ export default function TermsOfService() {
             </p>
             <p className="mt-2">
               Our open-source components (qontinui Python library,
-              qontinui-runner) are licensed under the MIT License and subject to
-              the terms of that license.
+              qontinui-runner, qontinui-web, qontinui-cloud-control, and others)
+              are licensed under the GNU Affero General Public License v3.0 or
+              later (AGPL-3.0) and subject to the terms of that license.
             </p>
 
             <h3 className="text-xl font-semibold mt-4 mb-2">
