@@ -3,15 +3,33 @@
  *
  * Importing this package side-effect-registers cloud-control routes,
  * components, services, and contexts with the OSS extension surface
- * (`@qontinui/web/lib/extension-slots`).
+ * (`@/lib/extension-slots`).
+ *
+ * HOST IMPORTS USE `@/`, NOT `@qontinui/web/`. There is no package named
+ * `@qontinui/web` anywhere in the workspace — qontinui-web's frontend
+ * package.json declares `"name": "frontend"`, and neither its tsconfig
+ * `paths` nor its next.config webpack `resolve.alias` maps that specifier.
+ * This module is compiled INSIDE the host app, so `@/...` (the host's only
+ * alias, `./src/*`) is the convention every other file here already uses.
+ * Getting this wrong is silent: `layout.tsx` loads this package with
+ * `import(...).catch(() => {})`, so a resolution failure is indistinguishable
+ * from "cloud-control is not installed" and every extension below simply
+ * never registers.
+ *
+ * `@/services/service-factory` resolves to the SAME module instance as the
+ * `@/lib/extension-slots` imported here, which is what makes the service
+ * registration below land in the registry the OSS `getService()` reads.
  */
 
 import { lazy, type ComponentType } from "react";
-import { registerCloudExtensions } from "@qontinui/web/lib/extension-slots";
+import { registerCloudExtensions } from "@/lib/extension-slots";
+import { httpClient } from "@/services/service-factory";
 import { OrganizationSwitcher } from "./components/collaboration/OrganizationSwitcher";
 import { CreateOrganizationDialog } from "./components/collaboration/CreateOrganizationDialog";
 import { TeamMemberList } from "./components/collaboration/TeamMemberList";
 import { InviteMemberDialog } from "./components/collaboration/InviteMemberDialog";
+import { BillingService } from "./services/billing-service";
+import { OrganizationService } from "./services/collaboration/organization-service";
 
 registerCloudExtensions({
   appRoutes: [
@@ -88,7 +106,33 @@ registerCloudExtensions({
     { href: "/organizations", label: "Organizations" },
   ],
   profilePanels: [],
-  services: {},
+  // Service slots — the OSS `ServiceFactory` wires `billingService` and
+  // `organizationService` as `cloudOnlySlot(...)` Proxies that resolve
+  // `getService(name)` on every property access. Until these were registered
+  // the Proxies threw "…is only available in the cloud-control deployment"
+  // IN THE CLOUD DEPLOYMENT TOO, because nothing ever filled the slots —
+  // 26 live call sites drove them. 16 in OSS (`hooks/useOrganization.ts`,
+  // `contexts/collaboration-context.tsx`,
+  // `contexts/collaboration/OrganizationContext.tsx`,
+  // `automation-builder/hooks/useProjectSharing.ts`) and 10 in THIS package,
+  // which reaches its own services back through the host factory:
+  // `routes/pricing.tsx`, `routes/organizations/[id]/{page,settings/page}.tsx`,
+  // `routes/organizations/[id]/members/_hooks/useMembersPage.ts` and
+  // `contexts/organization-context.tsx`. Every method those sites call
+  // (`getSubscription`, `redirectToCheckout`, `getOrganization(s)`,
+  // `createOrganization`, `updateOrganization`, `deleteOrganization`,
+  // `getStatistics`, `getMembers`, `inviteMember`, `updateMemberRole`,
+  // `removeMember`) exists on the two classes below.
+  //
+  // Constructed eagerly with the host's shared `httpClient` so both services
+  // reuse the one TokenManager/TokenRefreshService — a second HttpClient
+  // would fork the auth-refresh path. Safe at module scope: OSS loads this
+  // package by dynamic `import()` from `layout.tsx`, long after
+  // `service-factory` has evaluated.
+  services: {
+    billingService: new BillingService(httpClient),
+    organizationService: new OrganizationService(httpClient),
+  },
   // Inline component slots — OSS shell renders these via `getComponent(slot)`
   // when the cloud-control bundle has loaded, or nothing in OSS-only deploys.
   // Cast to `ComponentType<unknown>` because the slot Map stores opaque
