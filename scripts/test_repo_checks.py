@@ -138,12 +138,19 @@ class FrontendImportTests(unittest.TestCase):
         self.assertIn("http-client", violations[0])
 
     def test_host_resolved_alias_import_is_ignored(self) -> None:
-        """`@/...` is the host app's alias — unresolvable here BY DESIGN."""
+        """`@/...` is the host app's alias — unresolvable here BY DESIGN.
+
+        Third-party specifiers are equally out of scope: they resolve from the
+        host app's node_modules, which this repo does not have. (This case
+        deliberately no longer uses `@qontinui/web/...` as its example: no
+        package by that name exists, and holding it up as a *valid* host import
+        is what let `index.ts` import a specifier that could never resolve.)
+        """
         write(
             self.root,
             "frontend/src/x.tsx",
             'import { Button } from "@/components/ui/button";\n'
-            'import { y } from "@qontinui/web/lib/extension-slots";\n',
+            'import { toast } from "sonner";\n',
         )
         self.assertEqual(check_frontend_imports.find_violations(self.root), [])
 
@@ -167,6 +174,77 @@ class FrontendImportTests(unittest.TestCase):
             'const p = import("./does-not-exist");\n',
         )
         self.assertEqual(len(check_frontend_imports.find_violations(self.root)), 1)
+
+    # --- the self-reference cases: the gap this file's companion change closed -
+
+    def test_self_referential_subpath_import_is_caught(self) -> None:
+        """The carve-out's second defect class: importing this package by name.
+
+        Looks host-resolved like `@/...`, but is not — without an `exports`
+        map it resolves against the package ROOT, where `hooks/use-admin`
+        does not exist (the file is `frontend/src/hooks/use-admin.ts`).
+        """
+        write(self.root, "package.json", '{"name": "@qontinui/cloud-control"}')
+        write(self.root, "frontend/src/hooks/use-admin.ts", "export const u = 1;\n")
+        write(
+            self.root,
+            "frontend/src/routes/admin/page.tsx",
+            'import { u } from "@qontinui/cloud-control/hooks/use-admin";\n',
+        )
+        violations = check_frontend_imports.find_violations(self.root)
+        self.assertEqual(len(violations), 1)
+        self.assertIn("self-referential", violations[0])
+
+    def test_self_referential_bare_import_is_caught(self) -> None:
+        write(self.root, "package.json", '{"name": "@qontinui/cloud-control"}')
+        write(
+            self.root,
+            "frontend/src/a.ts",
+            'import "@qontinui/cloud-control";\n',
+        )
+        self.assertEqual(len(check_frontend_imports.find_violations(self.root)), 1)
+
+    def test_relative_rewrite_of_a_self_reference_is_clean(self) -> None:
+        """The prescribed fix must actually pass the gate."""
+        write(self.root, "package.json", '{"name": "@qontinui/cloud-control"}')
+        write(self.root, "frontend/src/hooks/use-admin.ts", "export const u = 1;\n")
+        write(
+            self.root,
+            "frontend/src/routes/admin/page.tsx",
+            'import { u } from "../../hooks/use-admin";\n',
+        )
+        self.assertEqual(check_frontend_imports.find_violations(self.root), [])
+
+    def test_package_sharing_a_name_prefix_is_not_a_self_reference(self) -> None:
+        """`@qontinui/cloud-control-extras` is a different package."""
+        write(self.root, "package.json", '{"name": "@qontinui/cloud-control"}')
+        write(
+            self.root,
+            "frontend/src/a.ts",
+            'import { z } from "@qontinui/cloud-control-extras/thing";\n',
+        )
+        self.assertEqual(check_frontend_imports.find_violations(self.root), [])
+
+    def test_package_name_is_read_from_package_json(self) -> None:
+        """The rule follows package.json, so the two can never drift."""
+        write(self.root, "package.json", '{"name": "@acme/renamed"}')
+        write(self.root, "frontend/src/a.ts", 'import "@acme/renamed/sub";\n')
+        violations = check_frontend_imports.find_violations(self.root)
+        self.assertEqual(len(violations), 1)
+        self.assertIn("@acme/renamed", violations[0])
+
+    def test_missing_package_json_falls_back_to_the_known_name(self) -> None:
+        write(
+            self.root,
+            "frontend/src/a.ts",
+            'import "@qontinui/cloud-control/services/billing-service";\n',
+        )
+        self.assertEqual(len(check_frontend_imports.find_violations(self.root)), 1)
+
+    def test_this_repo_passes_its_own_gate(self) -> None:
+        """The live tree, not a fixture — the assertion package.json now makes."""
+        repo_root = Path(__file__).resolve().parent.parent
+        self.assertEqual(check_frontend_imports.find_violations(repo_root), [])
 
 
 if __name__ == "__main__":
