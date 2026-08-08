@@ -1,6 +1,6 @@
 ﻿import { Badge } from "@/components/ui/badge";
 import { ChevronRight } from "lucide-react";
-import type { AdminUserData } from "@qontinui/cloud-control/hooks/use-admin";
+import type { AdminUserData } from "../../../hooks/use-admin";
 
 interface UsersTableProps {
   users: AdminUserData[];

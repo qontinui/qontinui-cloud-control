@@ -1,5 +1,5 @@
 ﻿import { ChevronRight } from "lucide-react";
-import type { AdminProjectData } from "@qontinui/cloud-control/hooks/use-admin";
+import type { AdminProjectData } from "../../../hooks/use-admin";
 
 interface ProjectsTableProps {
   projects: AdminProjectData[];

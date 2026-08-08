@@ -16,7 +16,7 @@ import {
   AlertTriangle,
 } from "lucide-react";
 import { toast } from "sonner";
-import { healthService } from "@qontinui/cloud-control/services/admin/health-service";
+import { healthService } from "../../../services/admin/health-service";
 
 interface AnalyticsData {
   dau: number;

@@ -6,7 +6,7 @@
   Zap,
   DollarSign,
 } from "lucide-react";
-import type { AdminStats } from "@qontinui/cloud-control/hooks/use-admin";
+import type { AdminStats } from "../../../hooks/use-admin";
 import { MetricCell } from "./MetricCell";
 
 interface MetricsStripProps {

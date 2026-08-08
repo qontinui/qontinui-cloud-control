@@ -15,7 +15,7 @@ import {
   Clock,
 } from "lucide-react";
 import { toast } from "sonner";
-import { healthService } from "@qontinui/cloud-control/services/admin/health-service";
+import { healthService } from "../../services/admin/health-service";
 
 const REFRESH_INTERVAL = 30000;
 

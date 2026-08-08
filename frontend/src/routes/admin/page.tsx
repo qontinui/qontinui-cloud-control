@@ -5,7 +5,7 @@ import {
   useAdminStats,
   useAdminUsers,
   useAdminProjects,
-} from "@qontinui/cloud-control/hooks/use-admin";
+} from "../../hooks/use-admin";
 import { useAdminGuard, type Section } from "./_hooks/useAdminGuard";
 import { AdminHeader } from "./_components/AdminHeader";
 import { MetricsStrip } from "./_components/MetricsStrip";
