@@ -4,10 +4,9 @@
   "private": true,
   "license": "AGPL-3.0-or-later",
   "description": "Cloud extension to qontinui-web — powers the qontinui.cloud deployment (billing, multi-tenant routing, cloud-admin). AGPL-3.0; not published to npm (consumed as a file: path dependency).",
-  "main": "./src/index.ts",
-  "scripts": {
-    "test": "vitest run"
-  },
+  "main": "./frontend/src/index.ts",
+  "//": "No `test` script on purpose: the previous `vitest run` could not run (vitest was not a dependency, and neither a config nor a test file existed). A JS suite here needs the host app's `@/*` alias graph, since this package compiles inside qontinui-web. See .qontinui/ci.toml. The scripts/ gates are tested by `python3 -m unittest discover -s scripts`.",
+  "//exports": "No `exports` map on purpose. `main` alone is what qontinui-web's dynamic `import(\"@qontinui/cloud-control\")` resolves, and adding `exports` would ALSO make it an encapsulation boundary that hides every subpath not listed. Wildcard targets do no extension resolution either, so a single `./services/*` pattern cannot serve both .ts and .tsx. Add explicit entries when a real deep-import consumer appears; today there are none, only prose references in qontinui-web comments.",
   "dependencies": {
     "@stripe/stripe-js": "^4"
   },

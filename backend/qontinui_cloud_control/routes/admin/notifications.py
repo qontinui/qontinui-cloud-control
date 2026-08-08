@@ -3,17 +3,19 @@
 from typing import Any
 
 import structlog
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.ext.asyncio import AsyncSession
-
 from app.api.admin_deps import require_admin
 from app.api.deps import get_async_db
 from app.models.user import User
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from qontinui_cloud_control.schemas.admin import (
     AdminNotificationSettingsResponse,
     AdminNotificationSettingsUpdate,
 )
-from qontinui_cloud_control.services.admin_notification_service import admin_notification_service
+from qontinui_cloud_control.services.admin_notification_service import (
+    admin_notification_service,
+)
 
 router = APIRouter()
 logger = structlog.get_logger(__name__)

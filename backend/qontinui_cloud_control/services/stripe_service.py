@@ -1,8 +1,8 @@
 """Stripe service - delegates to refactored architecture."""
 
+from app.models.user import User
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models.user import User
 from qontinui_cloud_control.services.stripe.stripe_facade import stripe_facade
 
 

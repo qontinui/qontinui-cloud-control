@@ -20,7 +20,9 @@ from qontinui_cloud_control.routes.admin.download_analytics import (
     router as download_analytics_router,
 )
 from qontinui_cloud_control.routes.admin.health import router as health_router
-from qontinui_cloud_control.routes.admin.notifications import router as notifications_router
+from qontinui_cloud_control.routes.admin.notifications import (
+    router as notifications_router,
+)
 from qontinui_cloud_control.routes.admin.projects import router as projects_router
 from qontinui_cloud_control.routes.admin.users import router as users_router
 

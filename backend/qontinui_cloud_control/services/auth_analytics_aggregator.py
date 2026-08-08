@@ -27,12 +27,11 @@ from datetime import UTC, datetime, timedelta
 from typing import Any, cast
 from uuid import UUID
 
-from sqlalchemy import and_, desc, func, select
-from sqlalchemy.ext.asyncio import AsyncSession
-
 from app.models.analytics_event import AnalyticsEvent
 from app.models.device_session import DeviceSession
 from app.models.user import User
+from sqlalchemy import and_, desc, func, select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 
 @dataclass

@@ -4,10 +4,10 @@ import asyncio
 from typing import Any
 
 import stripe
+from app.models.user import User
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models.user import User
 from qontinui_cloud_control.models.subscription import Subscription, SubscriptionTier
 
 

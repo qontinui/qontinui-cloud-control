@@ -12,9 +12,6 @@ from typing import Any
 from uuid import UUID
 
 import structlog
-from fastapi import APIRouter, Depends, Query, Request, status
-from sqlalchemy.ext.asyncio import AsyncSession
-
 from app.api.deps import get_async_db, get_current_active_user_async
 from app.middleware.rate_limit import user_limiter
 from app.models.user import User
@@ -32,6 +29,9 @@ from app.schemas.collaboration import (
     TeamMemberUpdate,
 )
 from app.schemas.project import Project
+from fastapi import APIRouter, Depends, Query, Request, status
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from qontinui_cloud_control.services.organization import (
     membership_service,
     organization_settings_service,

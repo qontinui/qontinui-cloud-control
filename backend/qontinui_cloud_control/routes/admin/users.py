@@ -3,12 +3,12 @@
 import uuid
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.ext.asyncio import AsyncSession
-
 from app.api.admin_deps import require_admin
 from app.api.deps import get_async_db
 from app.models.user import User
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from qontinui_cloud_control.repositories.admin_user import admin_user_repository
 from qontinui_cloud_control.schemas.admin import AdminUserData
 

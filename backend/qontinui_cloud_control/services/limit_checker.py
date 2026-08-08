@@ -2,11 +2,11 @@
 
 from uuid import UUID
 
+from app.models.project import Project
+from app.models.storage_usage import StorageUsage
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models.project import Project
-from app.models.storage_usage import StorageUsage
 from qontinui_cloud_control.models.subscription import Subscription
 from qontinui_cloud_control.services.stripe_service import StripeService
 

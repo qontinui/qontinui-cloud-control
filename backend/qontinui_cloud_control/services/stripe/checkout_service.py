@@ -4,10 +4,12 @@ import asyncio
 from types import ModuleType
 
 import stripe
+from app.models.user import User
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models.user import User
-from qontinui_cloud_control.services.stripe.customer_service import StripeCustomerService
+from qontinui_cloud_control.services.stripe.customer_service import (
+    StripeCustomerService,
+)
 
 
 class StripeCheckoutService:

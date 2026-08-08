@@ -1,5 +1,5 @@
-import { HttpClient } from "./http-client";
-import { ApiConfig } from "./api-config";
+import { HttpClient } from "@/services/http-client";
+import { ApiConfig } from "@/services/api-config";
 
 export interface Subscription {
   tier: "free" | "hobby" | "pro";

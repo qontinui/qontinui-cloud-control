@@ -8,8 +8,8 @@
  * - Organization switching
  */
 
-import { HttpClient } from "../http-client";
-import { ApiConfig } from "../api-config";
+import { HttpClient } from "@/services/http-client";
+import { ApiConfig } from "@/services/api-config";
 import type {
   Organization,
   OrganizationCreate,

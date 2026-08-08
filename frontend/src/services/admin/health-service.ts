@@ -5,7 +5,7 @@
  * security warnings, and session statistics.
  */
 
-import { ApiConfig } from "../api-config";
+import { ApiConfig } from "@/services/api-config";
 import { createLogger } from "@/lib/logger";
 
 const log = createLogger("HealthService");

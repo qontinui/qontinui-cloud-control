@@ -1,0 +1,59 @@
+name: CI
+
+# Lint, type-check and gate-self-test jobs for cloud-control.
+#
+# Kept separate from boundary-guard.yml on purpose: that workflow's
+# `no-coord-import` job is a licence-boundary invariant with its own required
+# status context, and folding new jobs into it would rename nothing but muddle
+# what "boundary-guard failed" means. This file holds the ordinary code gates.
+#
+# PARITY: every job below is mirrored in .qontinui/ci.toml for the
+# runner-as-CI-node lane. When a gate here changes, update that file in the SAME
+# PR. Steps are referenced from there BY NAME, never by line number.
+#
+# Every gate here runs standalone — no sibling checkout, no qontinui-web install.
+# That is a deliberate constraint, not a coincidence: the local-CI lane cannot
+# provision siblings yet, so a gate that needed one could not be mirrored and the
+# two lanes would drift.
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  repo-checks:
+    name: Repo checks (stdlib only)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: frontend relative imports resolve
+        run: python3 scripts/check_frontend_imports.py
+      - name: gate self-tests
+        run: python3 -m unittest discover -s scripts -p 'test_*.py' -v
+
+  python-lint:
+    name: Lint & type-check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install gate tooling
+        # `~=` rather than `>=` so this line is character-identical to the
+        # mirrored step in .qontinui/ci.toml, where `>` is a banned argv
+        # character that would reject the manifest outright.
+        run: python3 -m pip install --upgrade "ruff~=0.6" "mypy~=1.11"
+      - name: Run ruff (linting)
+        run: ruff check backend/ scripts/
+      - name: Run ruff format (formatting)
+        run: ruff format --check backend/ scripts/
+      - name: Run mypy (type checking)
+        # No `pip install -e .` — mypy is green with and without this package's
+        # runtime deps (verified both ways), and skipping the install keeps the
+        # job fast and the local-lane mirror exact.
+        run: mypy backend/qontinui_cloud_control scripts
