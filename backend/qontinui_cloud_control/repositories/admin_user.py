@@ -389,29 +389,6 @@ class AdminUserRepository:
         )
         return result.scalar_one_or_none()
 
-    async def make_user_admin(
-        self,
-        db: AsyncSession,
-        user: User,
-    ) -> User:
-        """
-        Make a user an admin (superuser).
-
-        Args:
-            db: Async database session
-            user: User to promote
-
-        Returns:
-            Updated user
-        """
-        user.is_superuser = True
-        await db.commit()
-        await db.refresh(user)
-
-        logger.info("user_promoted_to_admin", user_email=user.email)
-
-        return user
-
 
 # Singleton instance
 admin_user_repository = AdminUserRepository()
