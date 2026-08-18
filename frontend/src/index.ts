@@ -28,6 +28,8 @@ import { OrganizationSwitcher } from "./components/collaboration/OrganizationSwi
 import { CreateOrganizationDialog } from "./components/collaboration/CreateOrganizationDialog";
 import { TeamMemberList } from "./components/collaboration/TeamMemberList";
 import { InviteMemberDialog } from "./components/collaboration/InviteMemberDialog";
+import { BetaBanner } from "./components/beta-banner";
+import { SubscriptionBadge } from "./components/subscription-badge";
 import { BillingService } from "./services/billing-service";
 import { OrganizationService } from "./services/collaboration/organization-service";
 
@@ -143,5 +145,7 @@ registerCloudExtensions({
     createOrganizationDialog: CreateOrganizationDialog as ComponentType<unknown>,
     teamMemberList: TeamMemberList as ComponentType<unknown>,
     inviteMemberDialog: InviteMemberDialog as ComponentType<unknown>,
+    betaBanner: BetaBanner as ComponentType<unknown>,
+    subscriptionBadge: SubscriptionBadge as ComponentType<unknown>,
   },
 });
