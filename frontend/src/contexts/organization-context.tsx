@@ -63,7 +63,11 @@ export function OrganizationProvider({ children }: OrganizationProviderProps) {
   const loadOrganizations = useCallback(async () => {
     try {
       setLoading(true);
-      const orgs = await organizationService.getOrganizations();
+      // The host's `OrganizationService` contract returns `Promise<any>`
+      // (deliberately loose, so OSS callers compile without adaptation), so
+      // the annotation has to be stated here or every downstream callback
+      // parameter is an implicit `any` under the host's `noImplicitAny`.
+      const orgs: Organization[] = await organizationService.getOrganizations();
       setOrganizations(orgs);
 
       // Only set current organization on initial load

@@ -69,6 +69,8 @@ function getRoleDescription(role: MemberRole): string {
       return "Can create and edit projects and workflows";
     case "viewer":
       return "Can view projects but cannot make changes";
+    case "helper":
+      return "Can only work the helper task queue at /help — no access to projects or organization settings";
   }
 }
 
@@ -82,6 +84,7 @@ function getRoleBadgeVariant(
     case "member":
       return "secondary";
     case "viewer":
+    case "helper":
       return "outline";
   }
 }

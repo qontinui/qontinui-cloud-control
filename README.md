@@ -44,11 +44,31 @@ The OSS `app.main:app` entry-point is reused as-is. Cloud-control attaches itsel
 
 ```
 cd qontinui-web/frontend
-pnpm install --link ../../qontinui-cloud-control/frontend
-pnpm dev
+npm ci
+npm run cloud:install    # links this repo into node_modules
+npm run dev
 ```
 
-OSS's `layout.tsx` dynamic-imports `@qontinui/cloud-control`; the import is silently no-op'd when the package isn't linked.
+`npm run cloud:status` reports which shape the tree is in and
+`npm run cloud:remove` returns it to OSS-only. Re-run `cloud:install` after any
+`npm install` / `npm ci`, which prune the link as extraneous.
+
+This package ships raw `.ts`/`.tsx` with no build step, and compiles **inside**
+the host app — that is what makes the `@/...` imports in these sources (the
+host's alias, e.g. `@/lib/extension-slots`) resolve. qontinui-web enables that
+with `transpilePackages` when the link is present. A `"use client"` boot module
+in its root layout performs the side-effect import, so registration lands in
+the **browser's** module instance of the slot registry, which is the one every
+consumer reads.
+
+The full contract — how the two build shapes are wired, the CI job that gates
+the composed one, and the two defects this replaced (an unresolvable
+`webpackIgnore` import, evaluated in a Server Component, with its failure
+swallowed by `.catch(() => {})`) — is in
+[`qontinui-web/frontend/docs/composed-cloud-build.md`](https://github.com/qontinui/qontinui-web/blob/main/frontend/docs/composed-cloud-build.md).
+
+Note that npm is the only supported package manager here: qontinui-web's
+`preinstall` runs `npx only-allow npm`.
 
 ## License
 
