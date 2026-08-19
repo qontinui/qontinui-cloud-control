@@ -5,7 +5,8 @@
 #
 # PARITY IS A REVIEW-TIME INVARIANT: the steps below mirror the gate commands of
 # .github/workflows/boundary-guard.yml (`no-coord-import`) and
-# .github/workflows/ci.yml (`repo-checks`, `python-lint`). When either changes,
+# .github/workflows/ci.yml (`repo-checks`, `python-lint`) — every job except
+# `composed-typecheck`, which is disclosed in item 4 below. When either changes,
 # update this file in the SAME PR. Actions steps are referenced by NAME below,
 # never by line number — line numbers move and a stale citation makes the
 # invariant unauditable.
@@ -15,12 +16,14 @@
 # `[limits]` values are ceilings the executor caps against host-derived sizing.
 #
 # ===========================================================================
-# COVERAGE: EVERY ACTIONS GATE IS MIRRORED. The "what cannot run" section that
-# every other manifest in this fleet needs is, for this repo, EMPTY — not
+# COVERAGE: EVERY ACTIONS GATE IS MIRRORED EXCEPT ONE, AND THE EXCEPTION IS
+# NAMED. Until `composed-typecheck` was added, the "what cannot run" section
+# every other manifest in this fleet needs was, for this repo, EMPTY — not
 # because gates were dropped, but because the Actions lane was deliberately
 # built out of gates that need no `services:` database, no docker daemon, no
-# marketplace-only Action and no sibling checkout. That constraint is recorded
-# in ci.yml's own header so the next person to add a job keeps it.
+# marketplace-only Action and no sibling checkout. That constraint is still the
+# rule and is still recorded in ci.yml's header; it now has exactly one recorded
+# exception, item 4 below. Everything else here remains fully mirrored.
 #
 # Superseded note (was items 1-2 of this header, resolved by the follow-up PR
 # that added ci.yml): backend/ previously had no lint/format/type-check job
@@ -40,7 +43,40 @@
 #    provision until the plan's Phase 1 (sibling path-dep provisioning) lands.
 #    The repo's own testable surface — the gate scripts — IS tested, by the
 #    stdlib `unittest` step below.
-# 2. No JS/TS gate of any kind, for the alias-graph reason given above.
+# 2. SUPERSEDED — there IS a JS/TS gate now, on the Actions lane only.
+#    This item used to read "No JS/TS gate of any kind, for the alias-graph
+#    reason given above." The alias-graph fact has not changed: frontend/ still
+#    cannot be checked standalone, because it compiles inside qontinui-web's
+#    `@/*` graph and qontinui-web reaches back into it through `@cloud/*`. What
+#    changed is the conclusion drawn from it — ci.yml's `composed-typecheck` now
+#    checks this tree INSIDE qontinui-web rather than not at all. See item 4 for
+#    why only one of the two lanes can carry it.
+#
+# 4. ci.yml's `composed-typecheck` job — A CWD THIS LANE CANNOT EXPRESS.
+#    Its steps run `npm ci`, `npm run cloud:install`, `npm run type-check` and
+#    `npm test` inside a SIBLING checkout of qontinui-web, because that is the
+#    only place these sources resolve.
+#
+#    THE BLOCKER IS `working_dir`, NOT PROVISIONING. Stated precisely because the
+#    obvious guess is wrong and would send the next reader after the wrong fix:
+#    this lane CAN provision siblings — qontinui-web's own manifest declares two
+#    `[[siblings]]` and its `backend-install-cloud-control` step consumes one — so
+#    a `[[siblings]] repo = "qontinui/qontinui-web"` entry here would materialise
+#    the tree fine. What it could not do is RUN in it.
+#    `manifest.rs::validate_working_dir` requires `working_dir` to be
+#    repo-relative and rejects any parent (`..`) component, so
+#    `working_dir = "../qontinui-web/frontend"` is a hard validation REJECTION of
+#    the whole manifest. Note the asymmetry that makes this specific rather than
+#    general: `backend-install-cloud-control` escapes to `../../` in its ARGV,
+#    which is unrestricted — but no argv can relocate a process's cwd, and every
+#    step of this job needs its cwd in the sibling.
+#
+#    ONE UNTESTED CANDIDATE, named so this gap is not mistaken for permanent:
+#    `npm --prefix <dir> ci` / `npm --prefix <dir> run <script>` sets npm's
+#    prefix and runs lifecycle scripts from there, and `..` in argv is legal on
+#    this lane. Whether that is faithful for all four steps has NOT been
+#    verified. Verify it before either closing this gap or declaring it closed
+#    for good; do not mirror the job on the strength of the guess.
 #
 # 3. NO [[tools]] ARE DECLARED, AND THAT IS NOT THE SAME AS "NEEDS NOTHING".
 #    The runner's tool registry (ci_node/tools.rs) provisions exactly one tool,
@@ -56,6 +92,11 @@
 version = 1
 
 # NO [[siblings]] — and that is a checked statement, not an omission.
+#
+# ci.yml's `composed-typecheck` DOES check out qontinui-web, and this list still
+# does not declare it: no step below can run inside that tree (header item 4), so
+# provisioning it would materialise a multi-hundred-megabyte checkout that nothing
+# reads. Declare it in the same change that closes item 4, never before.
 #
 # boundary-guard.yml checks out nothing but this repo, and pyproject.toml
 # carries NO `path =` dependency: its own comment records the deliberate design,
