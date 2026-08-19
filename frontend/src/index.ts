@@ -84,24 +84,24 @@ registerCloudExtensions({
       Component: lazy(() => import("./routes/invitations/accept/page")),
     },
   ],
-  marketingRoutes: [
-    {
-      path: "/terms",
-      Component: lazy(() => import("./routes/terms/page")),
-    },
-    {
-      path: "/privacy",
-      Component: lazy(() => import("./routes/privacy/page")),
-    },
-    {
-      path: "/acceptable-use",
-      Component: lazy(() => import("./routes/acceptable-use/page")),
-    },
-    {
-      path: "/responsible-use",
-      Component: lazy(() => import("./routes/responsible-use/page")),
-    },
-  ],
+  // Marketing routes. `/terms`, `/acceptable-use` and `/responsible-use`
+  // were registered here as copies that are byte-identical (modulo a BOM and
+  // CRLF endings) to the pages qontinui-web already serves at those paths to
+  // everyone, cloud and self-hosted alike. Two copies of a legal document is
+  // a drift hazard with no upside — PR #9 edited the OSS side and happened
+  // not to diverge them only because both were touched — so the copies are
+  // deleted and the OSS pages are the single source.
+  //
+  // `/privacy` is NOT the same case and is deliberately left unresolved:
+  // cloud-control's policy is 326 lines against OSS's 92, i.e. a genuinely
+  // different document describing the hosted service's data handling. Which
+  // one a cloud deployment must serve is a legal/compliance decision, not an
+  // engineering one, and it is open in
+  // 2026-08-08-cloud-extension-route-mounting's "Open questions". Its page
+  // stays in the tree, unmounted — the OSS page is what every deployment
+  // serves today, so this preserves current behaviour rather than picking a
+  // policy by default. Do not mount it without that decision.
+  marketingRoutes: [],
   navItems: [
     { href: "/billing", label: "Billing" },
     { href: "/admin", label: "Admin", superuserOnly: true },
