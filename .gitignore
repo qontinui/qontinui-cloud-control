@@ -32,6 +32,13 @@ out/
 .env
 .env.local
 .env.*.local
+# Local credential drops. This repo is PUBLIC and AGPL-3.0, so an untracked
+# credential file here is one `git add -A` away from being published. Ignore
+# the shapes local tooling writes rather than relying on nobody typing that.
+dev-credentials.json
+*credentials*.json
+*.pem
+*.key
 
 # Logs
 *.log
