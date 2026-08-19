@@ -67,27 +67,61 @@ function isHealthyStatus(status: string | undefined): boolean {
  * label is accurate. The `free` tier has no meaningful billing status and is
  * always rendered normally.
  *
- * Takes no props and fetches its own data: it is registered into a component
- * slot whose declared props are empty.
+ * **Self-fetching by default, controllable by a caller that already has the
+ * data.** The component slot it is registered into declares empty props, so
+ * with no props it fetches its own subscription — that is the sidebar path and
+ * it is unchanged. A caller that has already loaded the subscription passes
+ * `source` instead, which suppresses the fetch.
+ *
+ * That option exists because `routes/billing/page.tsx` renders this badge in a
+ * header directly above a card built from its own `getSubscription()` call:
+ * uncontrolled, that is two identical requests per page load, and on the error
+ * path the card can say "Could not load your subscription" while the badge's
+ * independent fetch succeeded and reads "Pro" three inches away. One owner of
+ * the fetch removes both.
+ *
+ * `source` is a discriminated union rather than a nullable subscription so
+ * "the caller is still loading" and "the caller's load failed" cannot be
+ * confused with "the caller passed nothing, fetch it yourself".
  */
-export function SubscriptionBadge() {
-  const [subscription, setSubscription] = useState<Subscription | null>(null);
-  const [loadingSub, setLoadingSub] = useState(true);
+export type SubscriptionBadgeSource =
+  | { status: "loading" }
+  | { status: "error" }
+  | { status: "ready"; subscription: Subscription | null };
+
+export function SubscriptionBadge({
+  source,
+}: {
+  source?: SubscriptionBadgeSource;
+} = {}) {
+  const controlled = source !== undefined;
+  const [fetched, setFetched] = useState<Subscription | null>(null);
+  const [fetching, setFetching] = useState(!controlled);
 
   useEffect(() => {
-    loadSubscription();
-  }, []);
+    if (controlled) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const sub = await billingService.getSubscription();
+        if (!cancelled) setFetched(sub);
+      } catch (error) {
+        console.error("Failed to load subscription:", error);
+      } finally {
+        if (!cancelled) setFetching(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [controlled]);
 
-  const loadSubscription = async () => {
-    try {
-      const sub = await billingService.getSubscription();
-      setSubscription(sub);
-    } catch (error) {
-      console.error("Failed to load subscription:", error);
-    } finally {
-      setLoadingSub(false);
-    }
-  };
+  const loadingSub = controlled ? source.status === "loading" : fetching;
+  const subscription = controlled
+    ? source.status === "ready"
+      ? source.subscription
+      : null
+    : fetched;
 
   if (loadingSub) {
     return (

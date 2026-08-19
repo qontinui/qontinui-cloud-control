@@ -1,7 +1,5 @@
 "use client";
 
-export const dynamic = "force-dynamic";
-
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { AlertCircle, ExternalLink, Loader2 } from "lucide-react";
@@ -14,7 +12,10 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { SubscriptionBadge } from "../../components/subscription-badge";
+import {
+  SubscriptionBadge,
+  type SubscriptionBadgeSource,
+} from "../../components/subscription-badge";
 import type { Subscription, TierLimits } from "../../services/billing-service";
 
 /**
@@ -41,15 +42,20 @@ export default function BillingPage() {
   const [limits, setLimits] = useState<TierLimits | null>(null);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [limitsError, setLimitsError] = useState(false);
   const [portalPending, setPortalPending] = useState(false);
   const [portalError, setPortalError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
     setLoadError(null);
+    setLimitsError(false);
     try {
       // Settled, not `all`: the limits endpoint failing should not blank out
-      // the subscription the user actually came here to read.
+      // the subscription the user actually came here to read. Each half
+      // reports its own outcome — a silent `null` would be indistinguishable
+      // from "this plan has no limits", which is the papering-over this page
+      // says it does not do.
       const [subResult, limitsResult] = await Promise.allSettled([
         billingService.getSubscription(),
         billingService.getTierLimits(),
@@ -60,11 +66,28 @@ export default function BillingPage() {
         console.error("Failed to load subscription:", subResult.reason);
         setLoadError("Could not load your subscription.");
       }
-      setLimits(limitsResult.status === "fulfilled" ? limitsResult.value : null);
+      if (limitsResult.status === "fulfilled") {
+        setLimits(limitsResult.value);
+      } else {
+        console.error("Failed to load plan limits:", limitsResult.reason);
+        setLimits(null);
+        setLimitsError(true);
+      }
     } finally {
       setLoading(false);
     }
   }, []);
+
+  // The badge renders in this page's header, so it reads the subscription this
+  // component already owns instead of fetching its own. Uncontrolled it would
+  // issue a second identical request, and on the error path it could show a
+  // confident "Pro" directly above a card saying the subscription could not be
+  // loaded.
+  const badgeSource: SubscriptionBadgeSource = loading
+    ? { status: "loading" }
+    : loadError
+      ? { status: "error" }
+      : { status: "ready", subscription };
 
   useEffect(() => {
     void load();
@@ -96,7 +119,7 @@ export default function BillingPage() {
             Your plan, its limits, and how to change it.
           </p>
         </div>
-        <SubscriptionBadge />
+        <SubscriptionBadge source={badgeSource} />
       </header>
 
       <Card>
@@ -146,6 +169,15 @@ export default function BillingPage() {
                     : ""}
                 </dd>
               </div>
+              {limitsError && (
+                <div className="sm:col-span-2">
+                  <p className="flex items-start gap-2 text-muted-foreground">
+                    <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+                    Plan limits are unavailable right now. Your subscription
+                    above is unaffected.
+                  </p>
+                </div>
+              )}
               {limits && (
                 <>
                   <div>

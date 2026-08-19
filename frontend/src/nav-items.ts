@@ -43,5 +43,11 @@ export const cloudNavItems: NavItem[] = [
     icon: React.createElement(CreditCard, { className: "size-5" }),
     route: "/billing",
     color: "var(--brand-primary)",
+    // Same `group` as the entry above, deliberately. The sidebar renders a
+    // heading when `item.group != null && item.group !== lastGroup`, and only
+    // updates `lastGroup` on a truthy group — so an entry with no group joins
+    // whatever section precedes it. Leaving this blank made Billing's section
+    // a function of Organizations still being there and still being first.
+    group: "Account",
   },
 ];

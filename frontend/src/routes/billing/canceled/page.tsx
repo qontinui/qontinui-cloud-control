@@ -1,7 +1,5 @@
 "use client";
 
-export const dynamic = "force-dynamic";
-
 import { useRouter } from "next/navigation";
 import { XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
