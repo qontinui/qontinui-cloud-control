@@ -1,3 +1,24 @@
+/**
+ * UNMOUNTED, PENDING A LEGAL DECISION. Nothing renders this page.
+ *
+ * qontinui-web serves a 92-line privacy policy at `/privacy` to every
+ * deployment, cloud and self-hosted alike. This is a different, 326-line
+ * document describing the hosted service's data handling — not a duplicate of
+ * the OSS one, which is why it was not deleted alongside `terms`,
+ * `acceptable-use` and `responsible-use` (those were byte-identical copies).
+ *
+ * It was registered in the old `marketingRoutes` array, which nothing ever
+ * read, so the OSS page is what the cloud deployment has always served. That
+ * remains true. Mounting this one instead is a legal/compliance call about
+ * which policy binds hosted users, not an engineering one; it is open in
+ * plan 2026-08-08-cloud-extension-route-mounting's "Open questions".
+ *
+ * To mount it once decided: add `app/(marketing)/privacy/page.tsx` in the
+ * host re-exporting `@cloud/routes/privacy/page`, and point the OSS stub at
+ * `src/cloud-absent/routes/privacy/page.tsx` re-exporting today's OSS page.
+ * Do not do that without the decision.
+ */
+
 export default function PrivacyPolicy() {
   return (
     <div className="min-h-screen bg-white">

@@ -13,7 +13,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import type { Subscription } from "../services/billing-service";
+import type { Subscription } from "../../services/billing-service";
 
 const tiers = [
   {

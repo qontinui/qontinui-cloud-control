@@ -1,9 +1,25 @@
 /**
  * qontinui-cloud-control — cloud frontend extension to qontinui-web (AGPL-3.0-or-later).
  *
- * Importing this package side-effect-registers cloud-control routes,
- * components, services, and contexts with the OSS extension surface
- * (`@/lib/extension-slots`).
+ * Importing this package side-effect-registers cloud-control's service and
+ * component slots with the OSS extension surface (`@/lib/extension-slots`).
+ *
+ * ROUTES AND NAV ENTRIES DO NOT COME FROM HERE. They used to — as `appRoutes`
+ * / `marketingRoutes` / `navItems` arrays in this call — and nothing ever read
+ * them: Next builds the App Router from the filesystem at build time, and the
+ * host's sidebar builds its item list from static modules, so a runtime array
+ * of either could never take effect. The host now mounts routes with one-line
+ * re-export shims under `app/(app)/` and reads sidebar entries from
+ * `./nav-items.ts`, both resolved at build time through its `@cloud` alias.
+ *
+ * ROUTE FILE NAMING IS LOAD-BEARING. Every route is `routes/<path>/page.tsx`,
+ * mirroring the App Router, and the host's `cloud-route-shims` test treats
+ * exactly that set as the route inventory — every such file must either have
+ * a host shim or be named in the test's `UNMOUNTED` list with a reason. That
+ * is what replaced the old `appRoutes` array as the source of truth, so a
+ * route added as `routes/foo.tsx` is invisible to the guard. Supporting
+ * modules live in `_components/` / `_hooks/` or under any name that is not
+ * `page.tsx`. See the host's `frontend/docs/composed-cloud-build.md`.
  *
  * HOST IMPORTS USE `@/`, NOT `@qontinui/web/`. There is no package named
  * `@qontinui/web` anywhere in the workspace — qontinui-web's frontend
@@ -11,17 +27,18 @@
  * `paths` nor its next.config webpack `resolve.alias` maps that specifier.
  * This module is compiled INSIDE the host app, so `@/...` (the host's only
  * alias, `./src/*`) is the convention every other file here already uses.
- * Getting this wrong is silent: `layout.tsx` loads this package with
- * `import(...).catch(() => {})`, so a resolution failure is indistinguishable
- * from "cloud-control is not installed" and every extension below simply
- * never registers.
+ * Getting this wrong used to be silent: `layout.tsx` loaded this package with
+ * `import(...).catch(() => {})`, under which a resolution failure was
+ * indistinguishable from "cloud-control is not installed" and every extension
+ * below simply never registered. The host now uses a static import from
+ * `components/cloud-extensions-boot.tsx`, so it is a build error.
  *
  * `@/services/service-factory` resolves to the SAME module instance as the
  * `@/lib/extension-slots` imported here, which is what makes the service
  * registration below land in the registry the OSS `getService()` reads.
  */
 
-import { lazy, type ComponentType } from "react";
+import type { ComponentType } from "react";
 import { registerCloudExtensions } from "@/lib/extension-slots";
 import { httpClient } from "@/services/service-factory";
 import { OrganizationSwitcher } from "./components/collaboration/OrganizationSwitcher";
@@ -34,80 +51,6 @@ import { BillingService } from "./services/billing-service";
 import { OrganizationService } from "./services/collaboration/organization-service";
 
 registerCloudExtensions({
-  appRoutes: [
-    {
-      path: "/billing/success",
-      Component: lazy(() => import("./routes/billing/success")),
-    },
-    {
-      path: "/billing/canceled",
-      Component: lazy(() => import("./routes/billing/canceled")),
-    },
-    {
-      path: "/pricing",
-      Component: lazy(() => import("./routes/pricing")),
-    },
-    {
-      path: "/admin",
-      Component: lazy(() => import("./routes/admin/page")),
-    },
-    {
-      path: "/admin/mobile",
-      Component: lazy(() => import("./routes/admin/mobile/page")),
-    },
-    {
-      path: "/organizations",
-      Component: lazy(() => import("./routes/organizations/page")),
-    },
-    {
-      path: "/organizations/new",
-      Component: lazy(() => import("./routes/organizations/new/page")),
-    },
-    {
-      path: "/organizations/:id",
-      Component: lazy(() => import("./routes/organizations/[id]/page")),
-    },
-    {
-      path: "/organizations/:id/members",
-      Component: lazy(
-        () => import("./routes/organizations/[id]/members/page")
-      ),
-    },
-    {
-      path: "/organizations/:id/settings",
-      Component: lazy(
-        () => import("./routes/organizations/[id]/settings/page")
-      ),
-    },
-    {
-      path: "/invitations/accept",
-      Component: lazy(() => import("./routes/invitations/accept/page")),
-    },
-  ],
-  // Marketing routes. `/terms`, `/acceptable-use` and `/responsible-use`
-  // were registered here as copies that are byte-identical (modulo a BOM and
-  // CRLF endings) to the pages qontinui-web already serves at those paths to
-  // everyone, cloud and self-hosted alike. Two copies of a legal document is
-  // a drift hazard with no upside — PR #9 edited the OSS side and happened
-  // not to diverge them only because both were touched — so the copies are
-  // deleted and the OSS pages are the single source.
-  //
-  // `/privacy` is NOT the same case and is deliberately left unresolved:
-  // cloud-control's policy is 326 lines against OSS's 92, i.e. a genuinely
-  // different document describing the hosted service's data handling. Which
-  // one a cloud deployment must serve is a legal/compliance decision, not an
-  // engineering one, and it is open in
-  // 2026-08-08-cloud-extension-route-mounting's "Open questions". Its page
-  // stays in the tree, unmounted — the OSS page is what every deployment
-  // serves today, so this preserves current behaviour rather than picking a
-  // policy by default. Do not mount it without that decision.
-  marketingRoutes: [],
-  navItems: [
-    { href: "/billing", label: "Billing" },
-    { href: "/admin", label: "Admin", superuserOnly: true },
-    { href: "/organizations", label: "Organizations" },
-  ],
-  profilePanels: [],
   // Service slots — the OSS `ServiceFactory` wires `billingService` and
   // `organizationService` as `cloudOnlySlot(...)` Proxies that resolve
   // `getService(name)` on every property access. Until these were registered
@@ -128,15 +71,19 @@ registerCloudExtensions({
   //
   // Constructed eagerly with the host's shared `httpClient` so both services
   // reuse the one TokenManager/TokenRefreshService — a second HttpClient
-  // would fork the auth-refresh path. Safe at module scope: OSS loads this
-  // package by dynamic `import()` from `layout.tsx`, long after
-  // `service-factory` has evaluated.
+  // would fork the auth-refresh path. Safe at module scope: the host imports
+  // this package from `components/cloud-extensions-boot.tsx`, a different
+  // module from `service-factory`, so the factory has already evaluated by
+  // the time this line runs.
   services: {
     billingService: new BillingService(httpClient),
     organizationService: new OrganizationService(httpClient),
   },
-  // Inline component slots — OSS shell renders these via `getComponent(slot)`
-  // when the cloud-control bundle has loaded, or nothing in OSS-only deploys.
+  // Inline component slots — the OSS shell renders these with
+  // `useSlotComponent(slot)` when the cloud-control bundle has loaded, and
+  // nothing in OSS-only deploys. These stay while the route/nav arrays go:
+  // a component reference is a genuine runtime *value*, with no build-time
+  // filesystem or module-graph contract to satisfy.
   // Cast to `ComponentType<unknown>` because the slot Map stores opaque
   // components; OSS consumers re-cast to their declared prop interface
   // (see `qontinui-web/frontend/src/lib/cloud-component-slots.ts`).
