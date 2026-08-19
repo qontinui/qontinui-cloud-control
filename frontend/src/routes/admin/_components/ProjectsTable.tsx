@@ -1,4 +1,4 @@
-﻿import { ChevronRight } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import type { AdminProjectData } from "../../../hooks/use-admin";
 
 interface ProjectsTableProps {

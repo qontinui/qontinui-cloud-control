@@ -1,4 +1,4 @@
-﻿import { Badge } from "@/components/ui/badge";
+import { Badge } from "@/components/ui/badge";
 import { ChevronRight } from "lucide-react";
 import type { AdminUserData } from "../../../hooks/use-admin";
 
