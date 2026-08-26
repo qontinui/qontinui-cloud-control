@@ -41,6 +41,7 @@
 import type { ComponentType } from "react";
 import { registerCloudExtensions } from "@/lib/extension-slots";
 import { httpClient } from "@/services/service-factory";
+import { OrganizationProvider } from "./contexts/organization-context";
 import { OrganizationSwitcher } from "./components/collaboration/OrganizationSwitcher";
 import { CreateOrganizationDialog } from "./components/collaboration/CreateOrganizationDialog";
 import { TeamMemberList } from "./components/collaboration/TeamMemberList";
@@ -94,5 +95,20 @@ registerCloudExtensions({
     inviteMemberDialog: InviteMemberDialog as ComponentType<unknown>,
     betaBanner: BetaBanner as ComponentType<unknown>,
     subscriptionBadge: SubscriptionBadge as ComponentType<unknown>,
+  },
+  // Context providers the OSS shell must mount around the authenticated tree
+  // for the components above to work at all.
+  //
+  // `CreateOrganizationDialog`, `OrganizationSwitcher` and the org routes read
+  // THIS package's `useOrganization()`, which throws when its Provider is
+  // absent. qontinui-web mounts only its own OSS stub provider — a different
+  // context object — so before the `providers` slot existed there was no way
+  // to get this one mounted, and the dialog could only ever throw. It did:
+  // on 2026-08-26 it took down every authenticated page on qontinui.io.
+  //
+  // Registered FIRST among providers so it ends up outermost; nothing else
+  // here depends on it yet, but org context is the natural outer scope.
+  providers: {
+    organizationProvider: OrganizationProvider,
   },
 });
