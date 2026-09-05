@@ -171,6 +171,23 @@ jobs:
         working-directory: qontinui-web/frontend
         run: npm run type-check
 
+      # DECLARE THE SHAPE, or this step can skip the guard and go green.
+      # `cloud-route-shims.test.ts` derives "am I composed?" from the mere
+      # PRESENCE of the overlay at frontend/node_modules/@qontinui/cloud-control,
+      # and every cross-repo case in that file — including `mirrors
+      # cloud-control's route modules exactly`, the one this job exists to run —
+      # is `it.skipIf(!composed)`. So an overlay install that fails to link but
+      # still exits 0 would leave this step running the OSS shape, skipping the
+      # inventory diff, and reporting green: the gate reads as coverage while
+      # covering nothing.
+      #
+      # The test already carries the assertion that closes that — `agrees with
+      # CI about which build shape this is` — but it is inert unless CI declares
+      # the shape, because a bare local `npm test` must stay skippable. Setting
+      # this turns a silent skip into a loud failure naming the overlay path.
+      # qontinui-web's own `composed-cloud-build` sets it for the same reason.
       - name: Unit tests (composed)
         working-directory: qontinui-web/frontend
+        env:
+          QONTINUI_COMPOSED_BUILD: "1"
         run: npm test
