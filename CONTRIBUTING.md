@@ -13,7 +13,7 @@ Contributions are accepted under the **Developer Certificate of Origin (DCO) 1.1
 
     git commit -s -m "your message"
 
-which appends `Signed-off-by: Your Name <your@email>` from your `git config user.name` / `user.email`. Your contributions are licensed inbound under the same `AGPL-3.0-or-later` as the project (inbound = outbound); you retain copyright in your contributions. No relicensing rights are granted — the dual-/commercial-license lever is retained only on the embeddable `ui-bridge` library (via its CLA), not on the apps in this repository.
+which appends `Signed-off-by: Your Name <your@email>` from your `git config user.name` / `user.email`. Your contributions are licensed inbound under the same `AGPL-3.0-or-later` as the project (inbound = outbound); you retain copyright in your contributions. No relicensing rights are granted — the apps in this repository keep no dual-/commercial-license lever (the embeddable `ui-bridge` library, which used to keep one through a CLA, is now MIT-licensed and takes contributions under the DCO as well).
 
 ## Boundary
 
