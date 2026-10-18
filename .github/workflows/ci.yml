@@ -147,6 +147,62 @@ jobs:
           repository: qontinui/qontinui-web
           path: qontinui-web
 
+      # qontinui-web's `npm test` carries
+      # eslint-rules/no-dev-stack-fallback.vocabulary.test.mjs, which under CI
+      # reads the fleet-noun vocabulary from $QONTINUI_FLEET_NOUNS_FILE and is
+      # RED, never skipped, when it is absent. qontinui-web's own jobs provision
+      # it with `.github/actions/fleet-nouns-vocab`, but that action reads the
+      # pin from `$GITHUB_WORKSPACE/fleet-nouns.pin.toml` — i.e. it assumes
+      # qontinui-web IS the workspace root, which it is not here (see the
+      # subdirectory note above). So this is the same three steps, pointed at
+      # qontinui-web's pin under `qontinui-web/`. The pin is read from the web
+      # checkout, not copied here, so it moves with web's main exactly as the
+      # rest of this job does.
+      - name: Read qontinui-web's fleet-noun vocabulary pin
+        id: fleet_nouns_pin
+        run: |
+          python3 - "$GITHUB_WORKSPACE/qontinui-web/fleet-nouns.pin.toml" >> "$GITHUB_OUTPUT" <<'PY'
+          import re, sys, tomllib
+          path = sys.argv[1]
+          with open(path, "rb") as fh:
+              pin = tomllib.load(fh).get("fleet_nouns", {})
+          ref, sha = pin.get("ref", ""), pin.get("sha256", "")
+          if not (isinstance(ref, str) and re.fullmatch(r"[0-9a-f]{40}", ref)
+                  and isinstance(sha, str) and re.fullmatch(r"[0-9a-f]{64}", sha)):
+              print(f"::error title=fleet-noun pin::{path} must carry [fleet_nouns] ref (40 hex) and sha256 (64 hex)", file=sys.stderr)
+              sys.exit(1)
+          print(f"ref={ref}")
+          print(f"sha256={sha}")
+          PY
+
+      - name: Checkout qontinui-schemas fleet-nouns.toml (public sibling, pinned ref)
+        uses: actions/checkout@v4
+        with:
+          repository: qontinui/qontinui-schemas
+          ref: ${{ steps.fleet_nouns_pin.outputs.ref }}
+          path: .sibling/qontinui-schemas-fleet-nouns
+          sparse-checkout: fleet-nouns.toml
+          sparse-checkout-cone-mode: false
+          persist-credentials: false
+
+      - name: Verify the vocabulary digest and export QONTINUI_FLEET_NOUNS_FILE
+        env:
+          PIN_REF: ${{ steps.fleet_nouns_pin.outputs.ref }}
+          PIN_SHA256: ${{ steps.fleet_nouns_pin.outputs.sha256 }}
+        run: |
+          file="$GITHUB_WORKSPACE/.sibling/qontinui-schemas-fleet-nouns/fleet-nouns.toml"
+          if [ ! -f "$file" ]; then
+            echo "::error title=fleet-noun vocabulary::$file absent after checking out qontinui-schemas at $PIN_REF"
+            exit 1
+          fi
+          got="$(sha256sum "$file" | cut -d' ' -f1)"
+          if [ "$got" != "$PIN_SHA256" ]; then
+            echo "::error title=fleet-noun vocabulary::$file has sha256 $got; qontinui-web/fleet-nouns.pin.toml pins $PIN_SHA256 at $PIN_REF"
+            exit 1
+          fi
+          echo "fleet-nouns.toml at $PIN_REF verified (sha256 $got)."
+          echo "QONTINUI_FLEET_NOUNS_FILE=$file" >> "$GITHUB_ENV"
+
       - name: Setup Node.js
         uses: actions/setup-node@v5
         with:
