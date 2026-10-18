@@ -38,8 +38,21 @@ name: CI
 
 on:
   pull_request:
+  # The merge-candidate*/** globs are load-bearing, not decorative: coord's
+  # merge train validates a land by pushing the REBASED tip to
+  # refs/heads/merge-candidate/<proposal_id> (or the -spec/-batch variants) and
+  # waits for that ref's CI before landing it. With `branches: [main]` alone the
+  # candidate push matched no workflow, no checks were ever reported, and the
+  # proposal sat in awaiting-ci forever. Every PR that landed here before
+  # 2026-10-18 was already based on main, so its candidate WAS its PR head and
+  # reused the PR's checks; #23 was the first that needed a real rebase and
+  # stalled. Same spelling qontinui-supervisor and qontinui-runner use.
   push:
-    branches: [main]
+    branches:
+      - main
+      - 'merge-candidate/**'
+      - 'merge-candidate-spec/**'
+      - 'merge-candidate-batch/**'
 
 jobs:
   repo-checks:

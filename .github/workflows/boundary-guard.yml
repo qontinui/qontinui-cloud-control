@@ -6,8 +6,14 @@ name: boundary-guard
 
 on:
   pull_request:
+  # merge-candidate*/**: coord's merge train runs CI on the rebased candidate
+  # ref before landing it; see the matching comment in ci.yml.
   push:
-    branches: [main]
+    branches:
+      - main
+      - 'merge-candidate/**'
+      - 'merge-candidate-spec/**'
+      - 'merge-candidate-batch/**'
 
 jobs:
   no-coord-import:
